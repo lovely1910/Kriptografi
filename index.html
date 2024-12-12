@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encrypt/Decrypt File</title>
+    <style>
+        /* Reset styles */
+        body, h1, p {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .container h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="file"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="file"]:focus,
+        input[type="text"]:focus {
+            border-color: #007bff;
+        }
+
+        button {
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .output {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .output a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .output a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Encrypt/Decrypt File</h1>
+        <form id="fileForm" enctype="multipart/form-data">
+            <label for="fileInput">Choose a File:</label>
+            <input type="file" id="fileInput" name="fileInput" accept=".docx, .xlsx, .pptx, .txt" required>
+            
+            <label for="key">Key:</label>
+            <input type="text" id="key" name="key" placeholder="Enter encryption key" required>
+            
+            <button type="submit">Encrypt/Decrypt</button>
+        </form>
+
+        <div id="output" class="output"></div>
+    </div>
+
+    <script>
+        document.getElementById('fileForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const key = document.getElementById('key').value;
+            const file = document.getElementById('fileInput').files[0];
+
+            if (!key || !file) {
+                alert('Both key and file are required!');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('key', key);
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('output').innerHTML = `
+                        <h2>Result</h2>
+                        <a href="${result.encryptedFile}" download>Download Processed File</a>
+                    `;
+                } else {
+                    throw new Error('Error processing file!');
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    </script>
+</body>
+</html>
